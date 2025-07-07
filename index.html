@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Frontend API - Grupo 5</title>
+<meta charset="UTF-8">
+<title>Frontend API - Grupo 5</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<div class="contenedor">
   <h2>Login</h2>
   <form id="loginForm">
     <input type="text" id="nombreUsuario" placeholder="Usuario" required />
     <input type="password" id="claveHash" placeholder="Clave" required />
     <button type="submit">Iniciar sesión</button>
   </form>
-
   <div id="respuesta"></div>
+</div>
 
-  <h2>Usuarios (requiere token)</h2>
-  <button onclick="obtenerUsuarios()">Ver usuarios</button>
-  <pre id="usuarios"></pre>
-
-  <script src="main.js"></script>
+<script src="main.js"></script>
 </body>
 </html>

@@ -1,0 +1,91 @@
+ody {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #2C5F2D, #1E3D1A);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.contenedor {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+}
+
+h2 {
+  color: #2C5F2D;
+  margin: 0;
+  margin-bottom: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+input {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+button {
+  padding: 0.75rem;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #388E3C;
+}
+
+#respuesta {
+  margin-top: 1rem;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Estilos adicionales para el menú */
+ul.menu-opciones {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+ul.menu-opciones li {
+  margin: 0.5rem 0;
+}
+
+ul.menu-opciones li a {
+  text-decoration: none;
+  color: #2C5F2D;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+ul.menu-opciones li a:hover {
+  color: #4CAF50;
+}
