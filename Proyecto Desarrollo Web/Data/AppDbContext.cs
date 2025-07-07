@@ -8,5 +8,16 @@ namespace Proyecto_Desarrollo_Web.Data
             : base(options) { }
 
         public DbSet<Usuario> Usuarios { get; set; }
+
+        public DbSet<InsumoInformatico> Insumos { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<InsumoInformatico>()
+                .Property(i => i.Precio)
+                .HasColumnType("decimal(18,2)");
+        }
     }
 }
