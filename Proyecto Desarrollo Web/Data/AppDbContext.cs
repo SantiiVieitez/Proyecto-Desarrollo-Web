@@ -11,6 +11,8 @@ namespace Proyecto_Desarrollo_Web.Data
 
         public DbSet<InsumoInformatico> Insumos { get; set; }
 
+        public DbSet<Privilegio> Privilegios { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -18,6 +20,11 @@ namespace Proyecto_Desarrollo_Web.Data
             modelBuilder.Entity<InsumoInformatico>()
                 .Property(i => i.Precio)
                 .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Usuario>()
+                .HasMany(u => u.Privilegios)
+                .WithMany()
+                .UsingEntity(j => j.ToTable("UsuarioPrivilegios"));
         }
     }
 }

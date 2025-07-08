@@ -18,11 +18,13 @@ namespace Proyecto_Desarrollo_Web.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] Usuario usuarioLogin)
+        public IActionResult Login([FromBody] string user, string password)
         {
+            string passwordHash = CriptographyService.GetSHA256(password);
+
             var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.Name == usuarioLogin.Name &&
-                                     u.ClaveHash == usuarioLogin.ClaveHash);
+                .FirstOrDefault(u => u.Name == user &&
+                                     u.ClaveHash == passwordHash);
 
             if (usuario == null || !usuario.Activo)
                 return Unauthorized("Credenciales inválidas");
