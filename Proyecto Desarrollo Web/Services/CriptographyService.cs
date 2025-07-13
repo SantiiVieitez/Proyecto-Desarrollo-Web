@@ -7,8 +7,8 @@ namespace Proyecto_Desarrollo_Web.Services
     {
         public static string GetSHA256(string value)
         {
-            using var sha256 = SHA256.Create(); // ✅ uso recomendado
-            var encoding = Encoding.ASCII;
+            using var sha256 = SHA256.Create();
+            var encoding = Encoding.UTF8;
             var stream = sha256.ComputeHash(encoding.GetBytes(value));
 
             var sb = new StringBuilder();

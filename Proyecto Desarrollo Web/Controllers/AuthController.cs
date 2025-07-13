@@ -17,14 +17,24 @@ namespace Proyecto_Desarrollo_Web.Controllers
             _tokenService = tokenService;
         }
 
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] string user, string password)
+        [HttpGet("salt")]
+        public IActionResult GetSalt(string username)
         {
-            string passwordHash = CriptographyService.GetSHA256(password);
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.Name == username);
+            if (usuario == null)
+                return NotFound(new { message = "Usuario no encontrado" });
+
+            return Ok(new { salt = usuario.Salt });
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginRequest request)
+        {
+            //string passwordHash = CriptographyService.GetSHA256(request.Password);
 
             var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.Name == user &&
-                                     u.ClaveHash == passwordHash);
+                .FirstOrDefault(u => u.Name == request.User &&
+                                     u.ClaveHash == request.Password);
 
             if (usuario == null || !usuario.Activo)
                 return Unauthorized("Credenciales inválidas");

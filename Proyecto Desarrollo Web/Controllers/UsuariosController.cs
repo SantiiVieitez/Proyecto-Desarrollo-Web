@@ -37,6 +37,7 @@ namespace Proyecto_Desarrollo_Web.Controllers
             return Ok(usuario);
         }
 
+
         [HttpPost]
         public IActionResult CrearUsuario([FromBody] Usuario usuario)
         {
