@@ -1,6 +1,6 @@
 ﻿namespace Proyecto_Desarrollo_Web.Models
 {
-    public class InsumoInformatico
+    public class Insumo
     {
         public int Id { get; set; }
         public string Nombre { get; set; }
