@@ -1,6 +1,3 @@
-const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
-
-// LOGIN
 document.getElementById("loginForm")?.addEventListener("submit", async function (e) {
   e.preventDefault();
 

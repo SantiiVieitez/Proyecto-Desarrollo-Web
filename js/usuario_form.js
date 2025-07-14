@@ -1,12 +1,8 @@
-const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
-
-// helper para obtener query params
 function getQueryParam(name) {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get(name);
 }
 
-// Cargar privilegios y (opcionalmente) datos del usuario
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("privilegiosContainer");
   const usuarioId = getQueryParam("id");
@@ -34,7 +30,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     if (usuarioId) {
-      // cargar datos del usuario
       const resUser = await fetch(`${API_URL}/usuarios/${usuarioId}`);
       if (!resUser.ok) throw new Error("Usuario no encontrado");
 
@@ -42,7 +37,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("nombreUsuario").value = usuario.name;
       document.getElementById("activo").checked = usuario.activo;
 
-      // marcar privilegios
       usuario.privilegios.forEach(priv => {
         const checkbox = document.getElementById(`priv-${priv.id}`);
         if (checkbox) checkbox.checked = true;
@@ -55,7 +49,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// Guardar
 document.getElementById("guardarBtn").addEventListener("click", async () => {
   const usuarioId = getQueryParam("id");
 
@@ -83,20 +76,20 @@ document.getElementById("guardarBtn").addEventListener("click", async () => {
   }
 
   if (usuarioId) {
-    payload.id = parseInt(usuarioId); // 👈 agrega el id al body
+    payload.id = parseInt(usuarioId);
   }
 
   try {
     let res;
     if (usuarioId) {
-      // PUT para actualizar
+
       res = await fetch(`${API_URL}/usuarios/${usuarioId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
     } else {
-      // POST para crear
+
       res = await fetch(`${API_URL}/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

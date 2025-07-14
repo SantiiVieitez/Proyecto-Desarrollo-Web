@@ -1,7 +1,3 @@
-const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
-
-// helper para la base del proyecto
-
 async function cargarUsuarios() {
   const res = await fetch(`${API_URL}/usuarios`);
   const usuarios = await res.json();

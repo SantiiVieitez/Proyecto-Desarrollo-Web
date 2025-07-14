@@ -1,7 +1,6 @@
-const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
-
 document.addEventListener('DOMContentLoaded', () => {
   cargarInsumos();
+  verificarPrivilegios();
 
   document.getElementById('insumoForm').addEventListener('submit', async e => {
     e.preventDefault();
@@ -16,19 +15,21 @@ document.addEventListener('DOMContentLoaded', () => {
       codigo: document.getElementById('codigo').value
     };
 
+    const token = localStorage.getItem('token');
+
     try {
-      if (insumo.id == 0) {
-        await fetch(`${API_URL}/insumos`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(insumo)
-        });
-      } else {
-        await fetch(`${API_URL}/insumos/${insumo.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(insumo)
-        });
+      const res = await fetch(`${API_URL}/insumos${insumo.id == 0 ? '' : '/' + insumo.id}`, {
+        method: insumo.id == 0 ? 'POST' : 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(insumo)
+      });
+
+      if (!res.ok) {
+        const data = await res.text();
+        throw new Error(data || "Error al guardar");
       }
 
       e.target.reset();
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       console.error("Error al guardar insumo:", err);
-      alert("Ocurrió un error al guardar el insumo.");
+      alert("No tienes permisos para crear o modificar insumos.");
     }
   });
 
@@ -46,6 +47,27 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('insumoId').value = '';
   });
 });
+
+async function verificarPrivilegios() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  const payload = JSON.parse(atob(token.split('.')[1]));
+
+  const privilegios = payload.Privilegio || []; // OJO: mayúscula
+  const puedeCrear = privilegios.includes('CrearInsumo');
+  const puedeModificar = privilegios.includes('ModificarInsumo');
+
+  const btnGuardar = document.querySelector('#insumoForm button[type="submit"]');
+  if (!puedeCrear && !puedeModificar) {
+    btnGuardar.disabled = true;
+    btnGuardar.title = "No tienes permiso para crear/editar insumos.";
+  }
+
+  // Guardamos en window para reutilizar en la tabla
+  window.tienePermisoCrearInsumo = puedeCrear;
+  window.tienePermisoModificarInsumo = puedeModificar;
+}
 
 async function cargarInsumos() {
   try {
@@ -67,7 +89,9 @@ async function cargarInsumos() {
         <td>$${insumo.precio.toFixed(2)}</td>
         <td>${insumo.codigo}</td>
         <td>
-          <button class="btn btn-sm btn-warning me-1" onclick='editarInsumo(${JSON.stringify(insumo)})'>Editar</button>
+          <button class="btn btn-sm btn-warning me-1 editar-btn" ${
+            window.tienePermisoModificarInsumo ? '' : 'disabled title="Sin permiso"'
+          } onclick='editarInsumo(${JSON.stringify(insumo)})'>Editar</button>
         </td>
       `;
       tbody.appendChild(row);
@@ -80,6 +104,11 @@ async function cargarInsumos() {
 }
 
 function editarInsumo(insumo) {
+  if (!window.tienePermisoModificarInsumo) {
+    alert("No tienes permisos para editar insumos.");
+    return;
+  }
+
   document.getElementById('insumoId').value = insumo.id;
   document.getElementById('nombre').value = insumo.nombre;
   document.getElementById('descripcion').value = insumo.descripcion;
