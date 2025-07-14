@@ -31,7 +31,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async function 
       respuestaDiv.innerText = "Login exitoso ✅";
 
       setTimeout(() => {
-        window.location.href = "../menu.html";
+        window.location.href = `${window.location.origin}${window.location.pathname.replace(/\/[^\/]*$/, '/') + 'menu.html'}`;
       }, 1000);
     } else {
       if (data.title && data.title.toLowerCase().includes("invalid")) {
