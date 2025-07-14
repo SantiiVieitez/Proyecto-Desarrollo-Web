@@ -30,6 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    document.getElementById('btnclean').addEventListener('click', () => {
+      document.getElementById('insumoForm').reset();
+      document.getElementById('insumoId').value = '';
+    });
+
     e.target.reset();
     document.getElementById('insumoId').value = '';
     cargarInsumos();
