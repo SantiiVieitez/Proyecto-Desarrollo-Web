@@ -8,6 +8,6 @@
         public string Salt { get; set; }
         public bool Activo { get; set; }
 
-        public List<Privilegio> Privilegios { get; set; } = new List<Privilegio>();
+        public ICollection<UsuariosPrivilegios> Privilegios { get; set; } = new List<UsuariosPrivilegios>();
     }
 }

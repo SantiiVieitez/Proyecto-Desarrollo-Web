@@ -45,7 +45,7 @@ namespace Proyecto_Desarrollo_Web.Controllers
             usuario.ClaveHash = CriptographyService.GetSHA256(usuario.ClaveHash + usuario.Salt);
 
             // Obtener IDs de los privilegios que vinieron
-            var privilegioIds = usuario.Privilegios.Select(p => p.Id).ToList();
+            var privilegioIds = usuario.Privilegios.Select(p => p.PrivilegiosId).ToList();
 
             // Buscar privilegios reales desde la base
             var privilegiosExistentes = _context.Privilegios
@@ -53,7 +53,7 @@ namespace Proyecto_Desarrollo_Web.Controllers
                 .ToList();
 
             // Asignarlos al usuario
-            usuario.Privilegios = privilegiosExistentes;
+            usuario.Privilegios = (ICollection<UsuariosPrivilegios>)privilegiosExistentes;
 
             _context.Usuarios.Add(usuario);
             _context.SaveChanges();
@@ -70,7 +70,7 @@ namespace Proyecto_Desarrollo_Web.Controllers
             }
 
             var usuarioExistente = _context.Usuarios
-                .Include(u => u.Privilegios) // ⬅️ Necesario para que EF pueda gestionar la relación
+                .Include(u => u.Privilegios) 
                 .FirstOrDefault(u => u.Id == id);
 
             if (usuarioExistente == null)
@@ -78,21 +78,20 @@ namespace Proyecto_Desarrollo_Web.Controllers
                 return NotFound("Usuario no encontrado.");
             }
 
-            // Actualizar propiedades básicas
+
             usuarioExistente.Name = usuarioActualizado.Name;
             usuarioExistente.Activo = usuarioActualizado.Activo;
             usuarioExistente.ClaveHash = CriptographyService.GetSHA256(usuarioActualizado.ClaveHash + usuarioExistente.Salt);
 
-            // 🔄 Actualizar privilegios (reemplazar completamente)
             usuarioExistente.Privilegios.Clear();
 
-            var nuevosPrivilegiosIds = usuarioActualizado.Privilegios.Select(p => p.Id).ToList();
+            var nuevosPrivilegiosIds = usuarioActualizado.Privilegios.Select(p => p.PrivilegiosId).ToList();
 
             var privilegiosActualizados = _context.Privilegios
                 .Where(p => nuevosPrivilegiosIds.Contains(p.Id))
                 .ToList();
 
-            usuarioExistente.Privilegios = privilegiosActualizados;
+            usuarioExistente.Privilegios = (ICollection<UsuariosPrivilegios>)privilegiosActualizados;
 
             try
             {

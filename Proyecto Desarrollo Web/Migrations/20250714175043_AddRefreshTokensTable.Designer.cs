@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Proyecto_Desarrollo_Web.Data;
 
@@ -11,9 +12,11 @@ using Proyecto_Desarrollo_Web.Data;
 namespace Proyecto_Desarrollo_Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250714175043_AddRefreshTokensTable")]
+    partial class AddRefreshTokensTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace Proyecto_Desarrollo_Web.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("PrivilegioUsuario", b =>
+                {
+                    b.Property<int>("PrivilegiosId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PrivilegiosId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("UsuarioPrivilegios", (string)null);
+                });
 
             modelBuilder.Entity("Proyecto_Desarrollo_Web.Models.Insumo", b =>
                 {
@@ -127,19 +145,19 @@ namespace Proyecto_Desarrollo_Web.Migrations
                     b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("Proyecto_Desarrollo_Web.Models.UsuariosPrivilegios", b =>
+            modelBuilder.Entity("PrivilegioUsuario", b =>
                 {
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
+                    b.HasOne("Proyecto_Desarrollo_Web.Models.Privilegio", null)
+                        .WithMany()
+                        .HasForeignKey("PrivilegiosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("PrivilegiosId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UsuarioId", "PrivilegiosId");
-
-                    b.HasIndex("PrivilegiosId");
-
-                    b.ToTable("UsuariosPrivilegios", (string)null);
+                    b.HasOne("Proyecto_Desarrollo_Web.Models.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Proyecto_Desarrollo_Web.Models.RefreshToken", b =>
@@ -151,35 +169,6 @@ namespace Proyecto_Desarrollo_Web.Migrations
                         .IsRequired();
 
                     b.Navigation("user");
-                });
-
-            modelBuilder.Entity("Proyecto_Desarrollo_Web.Models.UsuariosPrivilegios", b =>
-                {
-                    b.HasOne("Proyecto_Desarrollo_Web.Models.Privilegio", "Privilegio")
-                        .WithMany("Usuarios")
-                        .HasForeignKey("PrivilegiosId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Proyecto_Desarrollo_Web.Models.Usuario", "Usuario")
-                        .WithMany("Privilegios")
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Privilegio");
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("Proyecto_Desarrollo_Web.Models.Privilegio", b =>
-                {
-                    b.Navigation("Usuarios");
-                });
-
-            modelBuilder.Entity("Proyecto_Desarrollo_Web.Models.Usuario", b =>
-                {
-                    b.Navigation("Privilegios");
                 });
 #pragma warning restore 612, 618
         }

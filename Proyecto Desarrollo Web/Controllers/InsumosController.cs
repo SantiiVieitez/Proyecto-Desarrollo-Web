@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Proyecto_Desarrollo_Web.Data;
 using Proyecto_Desarrollo_Web.Models;
-using Proyecto_Desarrollo_Web.Services;
 
 namespace Proyecto_Desarrollo_Web.Controllers
 {
@@ -27,8 +27,7 @@ namespace Proyecto_Desarrollo_Web.Controllers
         [HttpGet("{id}")]
         public IActionResult GetInsumoById(int id)
         {
-            var insumo = _context.Insumos
-                .FirstOrDefault(i => i.Id == id);
+            var insumo = _context.Insumos.FirstOrDefault(i => i.Id == id);
 
             if (insumo == null)
                 return NotFound("Insumo no encontrado");
@@ -36,14 +35,35 @@ namespace Proyecto_Desarrollo_Web.Controllers
             return Ok(insumo);
         }
 
+        [Authorize]
         [HttpPost]
         public IActionResult CrearInsumo([FromBody] Insumo insumo)
         {
+            var username = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized("No se pudo identificar al usuario");
+
+            var usuario = _context.Usuarios
+                .Include(u => u.Privilegios)
+                    .ThenInclude(up => up.Privilegio)
+                .FirstOrDefault(u => u.Name == username);
+
+            if (usuario == null)
+                return Unauthorized("Usuario no encontrado");
+
+            bool tienePermiso = usuario.Privilegios.Any(p => p.Privilegio.Descripcion == "CrearInsumo");
+
+            if (!tienePermiso)
+                return Forbid("No tienes permiso para crear insumos");
+
             _context.Insumos.Add(insumo);
             _context.SaveChanges();
+
             return CreatedAtAction(nameof(GetInsumos), new { id = insumo.Id }, insumo);
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public IActionResult ModificarInsumo(int id, [FromBody] Insumo insumo)
         {
