@@ -1,7 +1,6 @@
 const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
 
 // helper para la base del proyecto
-const BASE_PATH = `${window.location.origin}/FrontEnd-DesarrolloWeb/`;
 
 async function cargarUsuarios() {
   const res = await fetch(`${API_URL}/usuarios`);
@@ -22,7 +21,7 @@ async function cargarUsuarios() {
 }
 
 function editar(id) {
-  location.href = `${BASE_PATH}usuario_form.html?id=${id}`;
+  location.href = `${window.location.origin}${window.location.pathname.replace(/\/[^\/]*$/, '/') + `usuario_form.html?id=${id}`}`;
 }
 
 function buscar() {
