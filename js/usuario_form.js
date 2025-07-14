@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const resPrivs = await fetch(`${API_URL}/privilegios`);
+    if (!resPrivs.ok) throw new Error("No se pudieron cargar los privilegios");
+
     const privilegios = await resPrivs.json();
 
     privilegios.forEach(p => {
@@ -22,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       div.innerHTML = `
         <input type="checkbox" class="form-check-input privilegio-checkbox" 
-               value="${p.id}" data-descripcion="${p.descripcion}" id="priv-${p.id}">
+               value="${p.id}" id="priv-${p.id}">
         <label for="priv-${p.id}" class="form-check-label">${p.descripcion}</label>
       `;
 
@@ -45,51 +47,51 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   } catch (err) {
     console.error(err);
-    alert("Error al cargar datos");
+    alert("❌ Error al cargar datos: " + err.message);
   }
 });
 
 document.getElementById("guardarBtn").addEventListener("click", async () => {
   const usuarioId = getQueryParam("id");
 
-  const nombre = document.getElementById("nombreUsuario").value;
-  const password = document.getElementById("clave").value;
+  const nombre = document.getElementById("nombreUsuario").value.trim();
+  const password = document.getElementById("clave").value.trim();
   const activo = document.getElementById("activo").checked;
 
+  if (!nombre) {
+    alert("El nombre de usuario es obligatorio");
+    return;
+  }
+
   const privilegiosSeleccionados = [];
-  document.querySelectorAll(".privilegio-checkbox:checked").forEach(cb => {
-    privilegiosSeleccionados.push({
-      id: parseInt(cb.value),
-      descripcion: cb.dataset.descripcion
+    document.querySelectorAll(".privilegio-checkbox:checked").forEach(cb => {
+      privilegiosSeleccionados.push(parseInt(cb.value, 10));
     });
-  });
 
-  const payload = {
-    name: nombre,
-    activo: activo,
-    salt: "abc",
-    privilegios: privilegiosSeleccionados
-  };
+    const payload = {
+      name: nombre,
+      activo: activo,
+      salt: "abc",
+      privilegiosIds: privilegiosSeleccionados
+    };
 
-  if (password.trim()) {
-    payload.claveHash = password;
-  }
+    if (password) {
+      payload.claveHash = password;
+    }
 
-  if (usuarioId) {
-    payload.id = parseInt(usuarioId);
-  }
+    if (usuarioId) {
+      payload.id = parseInt(usuarioId, 10);
+    }
 
   try {
     let res;
     if (usuarioId) {
-
       res = await fetch(`${API_URL}/usuarios/${usuarioId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
     } else {
-
       res = await fetch(`${API_URL}/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,14 +101,15 @@ document.getElementById("guardarBtn").addEventListener("click", async () => {
 
     if (res.ok) {
       alert("✅ Usuario guardado correctamente");
-      window.location.href = `${window.location.origin}${window.location.pathname.replace(/\/[^\/]*$/, '/') + 'usuarios.html'}`;
+      window.location.href =
+        `${window.location.origin}${window.location.pathname.replace(/\/[^\/]*$/, '/') + 'usuarios.html'}`;
     } else {
       const error = await res.json();
       console.error(error);
-      alert("❌ Error al guardar usuario");
+      alert("❌ Error al guardar usuario. Revisa los datos enviados.");
     }
   } catch (err) {
     console.error(err);
-    alert("❌ Error de conexión");
+    alert("❌ Error de conexión: " + err.message);
   }
 });
