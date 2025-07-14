@@ -1,4 +1,6 @@
-﻿namespace Proyecto_Desarrollo_Web.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Proyecto_Desarrollo_Web.Models
 {
     public class Usuario
     {
@@ -9,5 +11,8 @@
         public bool Activo { get; set; }
 
         public ICollection<UsuariosPrivilegios> Privilegios { get; set; } = new List<UsuariosPrivilegios>();
+
+        [NotMapped]
+        public List<int> PrivilegiosIds { get; set; }
     }
 }

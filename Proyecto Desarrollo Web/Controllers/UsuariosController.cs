@@ -20,7 +20,17 @@ namespace Proyecto_Desarrollo_Web.Controllers
         [HttpGet]
         public IActionResult GetUsuarios()
         {
-            var usuarios = _context.Usuarios.ToList();
+            var usuarios = _context.Usuarios
+                .Include(u => u.Privilegios)
+                .ToList()
+                .Select(usuario => new
+                {
+                    usuario.Id,
+                    usuario.Name,
+                    usuario.Activo,
+                    Privilegios = usuario.Privilegios.Select(p => p.PrivilegiosId).ToList()
+                });
+
             return Ok(usuarios);
         }
 
@@ -34,74 +44,128 @@ namespace Proyecto_Desarrollo_Web.Controllers
             if (usuario == null)
                 return NotFound("Usuario no encontrado");
 
-            return Ok(usuario);
+            var usuarioDTO = new
+            {
+                usuario.Id,
+                usuario.Name,
+                usuario.Activo,
+                Privilegios = usuario.Privilegios.Select(p => p.PrivilegiosId).ToList()
+            };
+
+            return Ok(usuarioDTO);
         }
 
 
         [HttpPost]
         public IActionResult CrearUsuario([FromBody] Usuario usuario)
         {
+            if (string.IsNullOrWhiteSpace(usuario.Name) || usuario.PrivilegiosIds == null || usuario.PrivilegiosIds.Count == 0)
+            {
+                return BadRequest("Nombre de usuario y privilegios son obligatorios.");
+            }
+
             usuario.Salt = CriptographyService.GenerarSalt();
             usuario.ClaveHash = CriptographyService.GetSHA256(usuario.ClaveHash + usuario.Salt);
 
-            // Obtener IDs de los privilegios que vinieron
-            var privilegioIds = usuario.Privilegios.Select(p => p.PrivilegiosId).ToList();
+            // Recuperar IDs de privilegios enviados
+            var privilegiosIds = usuario.PrivilegiosIds;
 
-            // Buscar privilegios reales desde la base
-            var privilegiosExistentes = _context.Privilegios
-                .Where(p => privilegioIds.Contains(p.Id))
+            // Validar que existan en la DB
+            var privilegios = _context.Privilegios
+                .Where(p => privilegiosIds.Contains(p.Id))
                 .ToList();
 
-            // Asignarlos al usuario
-            usuario.Privilegios = (ICollection<UsuariosPrivilegios>)privilegiosExistentes;
+            if (privilegios.Count != privilegiosIds.Count)
+            {
+                return BadRequest("Uno o más privilegios no son válidos.");
+            }
+
+            // Crear la relación Usuario-Privilegios
+            usuario.Privilegios = privilegios
+                .Select(p => new UsuariosPrivilegios
+                {
+                    PrivilegiosId = p.Id
+                }).ToList();
 
             _context.Usuarios.Add(usuario);
-            _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetUsuarios), new { id = usuario.Id }, usuario);
+            try
+            {
+                _context.SaveChanges();
+
+                // Aquí devolvemos solo los datos que queremos
+                var usuarioDTO = new
+                {
+                    usuario.Id,
+                    usuario.Name,
+                    usuario.Activo,
+                    Privilegios = usuario.Privilegios.Select(p => p.PrivilegiosId).ToList()
+                };
+
+                return CreatedAtAction(nameof(GetUsuarios), new { id = usuario.Id }, usuarioDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public IActionResult EditarUsuario(int id, [FromBody] Usuario usuarioActualizado)
         {
             if (id != usuarioActualizado.Id)
-            {
                 return BadRequest("El ID del usuario no coincide.");
-            }
 
             var usuarioExistente = _context.Usuarios
-                .Include(u => u.Privilegios) 
+                .Include(u => u.Privilegios)
                 .FirstOrDefault(u => u.Id == id);
 
             if (usuarioExistente == null)
-            {
                 return NotFound("Usuario no encontrado.");
-            }
-
 
             usuarioExistente.Name = usuarioActualizado.Name;
             usuarioExistente.Activo = usuarioActualizado.Activo;
-            usuarioExistente.ClaveHash = CriptographyService.GetSHA256(usuarioActualizado.ClaveHash + usuarioExistente.Salt);
+
+            if (!string.IsNullOrWhiteSpace(usuarioActualizado.ClaveHash))
+            {
+                usuarioExistente.ClaveHash =
+                    CriptographyService.GetSHA256(usuarioActualizado.ClaveHash + usuarioExistente.Salt);
+            }
 
             usuarioExistente.Privilegios.Clear();
 
-            var nuevosPrivilegiosIds = usuarioActualizado.Privilegios.Select(p => p.PrivilegiosId).ToList();
+            var privilegiosIds = usuarioActualizado.PrivilegiosIds;
 
-            var privilegiosActualizados = _context.Privilegios
-                .Where(p => nuevosPrivilegiosIds.Contains(p.Id))
+            var privilegios = _context.Privilegios
+                .Where(p => privilegiosIds.Contains(p.Id))
                 .ToList();
 
-            usuarioExistente.Privilegios = (ICollection<UsuariosPrivilegios>)privilegiosActualizados;
+            usuarioExistente.Privilegios = privilegios
+                .Select(p => new UsuariosPrivilegios
+                {
+                    UsuarioId = usuarioExistente.Id,
+                    PrivilegiosId = p.Id
+                }).ToList();
 
             try
             {
                 _context.SaveChanges();
-                return Ok("Usuario actualizado correctamente.");
+
+                var usuarioDTO = new
+                {
+                    usuarioExistente.Id,
+                    usuarioExistente.Name,
+                    usuarioExistente.Activo,
+                    Privilegios = usuarioExistente.Privilegios.Select(p => p.PrivilegiosId).ToList()
+                };
+
+                return Ok(usuarioDTO);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error al actualizar el usuario: {ex.Message}");
             }
         }
+
     }
 }
