@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5274/api"; // ajustá si usás otro puerto
+const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
 
 // LOGIN
 document.getElementById("loginForm")?.addEventListener("submit", async function (e) {
@@ -21,7 +21,6 @@ document.getElementById("loginForm")?.addEventListener("submit", async function 
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      
       body: JSON.stringify({ User: nombreUsuario, Password: hash })
     });
 
@@ -55,4 +54,3 @@ async function calcularSHA256(text) {
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   return hashHex;
 }
-

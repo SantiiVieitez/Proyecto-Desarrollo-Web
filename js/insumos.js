@@ -1,4 +1,4 @@
-const apiUrl = 'http://localhost:5274/api/insumos';
+const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api/insumos";
 
 document.addEventListener('DOMContentLoaded', () => {
   cargarInsumos();

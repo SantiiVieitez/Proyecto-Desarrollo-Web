@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5274/api";
+const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
 
 // Cargar privilegios en la página
 document.addEventListener("DOMContentLoaded", async () => {
