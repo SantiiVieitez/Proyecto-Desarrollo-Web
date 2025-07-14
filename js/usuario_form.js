@@ -1,36 +1,69 @@
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Usuario</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+const API_URL = "http://localhost:5274/api";
 
-<div class="container py-5">
-  <h2 id="titulo">Nuevo Usuario</h2>
+// Cargar privilegios en la página
+document.addEventListener("DOMContentLoaded", async () => {
+  const container = document.getElementById("privilegiosContainer");
 
-  <form id="usuarioForm">
-    <input type="hidden" id="usuarioId">
-    <div class="mb-3">
-      <label for="name" class="form-label">Nombre</label>
-      <input type="text" id="name" class="form-control" required>
-    </div>
+  try {
+    const res = await fetch(`${API_URL}/privilegios`);
+    const privilegios = await res.json();
 
-    <div class="mb-3">
-      <label for="password" class="form-label">Contraseña</label>
-      <input type="password" id="password" class="form-control">
-    </div>
+    privilegios.forEach(p => {
+      const div = document.createElement("div");
+      div.classList.add("form-check");
 
-    <div class="form-check mb-3">
-      <input class="form-check-input" type="checkbox" id="activo">
-      <label class="form-check-label" for="activo">
-        Activo
-      </label>
-    </div>
+      div.innerHTML = `
+        <input type="checkbox" class="form-check-input privilegio-checkbox" 
+               value="${p.id}" data-descripcion="${p.descripcion}" id="priv-${p.id}">
+        <label for="priv-${p.id}" class="form-check-label">${p.descripcion}</label>
+      `;
 
-    <h5>Privilegios</h5>
-    <div id="privilegiosList" class="mb-3"></div>
+      container.appendChild(div);
+    });
+  } catch (err) {
+    console.error(err);
+    alert("Error al cargar privilegios");
+  }
+});
 
-    <button type="submit" class="btn btn-primary">Guardar</button>
-  </form>
-</div>
+document.getElementById("guardarBtn").addEventListener("click", async () => {
+  const nombre = document.getElementById("nombreUsuario").value;
+  const password = document.getElementById("clave").value;
+  const activo = document.getElementById("activo").checked;
+
+  const privilegiosSeleccionados = [];
+  document.querySelectorAll(".privilegio-checkbox:checked").forEach(cb => {
+    privilegiosSeleccionados.push({
+      id: parseInt(cb.value),
+      descripcion: cb.dataset.descripcion
+    });
+  });
+
+  const payload = {
+    name: nombre,
+    claveHash: password,
+    activo: activo,
+    salt: "abc",
+    privilegios: privilegiosSeleccionados
+  };
+
+  try {
+    const res = await fetch(`${API_URL}/usuarios`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      alert("✅ Usuario guardado correctamente");
+      window.location.href = "usuarios.html";
+    } else {
+      const error = await res.json();
+      console.error(error);
+      alert("❌ Error al guardar usuario");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error de conexión");
+  }
+});

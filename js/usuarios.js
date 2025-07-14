@@ -19,7 +19,7 @@ async function cargarUsuarios() {
 }
 
 function editar(id) {
-  location.href = `usuario_form.html?id=${id}`;
+  location.href = `../html/usuario_form.html?id=${id}`;
 }
 
 function buscar() {
