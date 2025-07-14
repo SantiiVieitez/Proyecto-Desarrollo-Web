@@ -6,11 +6,11 @@ namespace Proyecto_Desarrollo_Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PrivilegiosControler : ControllerBase
+    public class PrivilegiosController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public PrivilegiosControler(AppDbContext context)
+        public PrivilegiosController(AppDbContext context)
         {
             _context = context;
         }
