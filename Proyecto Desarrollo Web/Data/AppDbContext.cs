@@ -9,7 +9,7 @@ namespace Proyecto_Desarrollo_Web.Data
 
         public DbSet<Usuario> Usuarios { get; set; }
 
-        public DbSet<InsumoInformatico> Insumos { get; set; }
+        public DbSet<Insumo> Insumos { get; set; }
 
         public DbSet<Privilegio> Privilegios { get; set; }
 
@@ -17,7 +17,7 @@ namespace Proyecto_Desarrollo_Web.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<InsumoInformatico>()
+            modelBuilder.Entity<Insumo>()
                 .Property(i => i.Precio)
                 .HasColumnType("decimal(18,2)");
 
