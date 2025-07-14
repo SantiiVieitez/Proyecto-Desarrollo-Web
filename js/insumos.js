@@ -1,4 +1,4 @@
-const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api/insumos";
+const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
 
 document.addEventListener('DOMContentLoaded', () => {
   cargarInsumos();
@@ -16,53 +16,67 @@ document.addEventListener('DOMContentLoaded', () => {
       codigo: document.getElementById('codigo').value
     };
 
-    if (insumo.id == 0) {
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(insumo)
-      });
-    } else {
-      await fetch(`${apiUrl}/${insumo.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(insumo)
-      });
-    }
+    try {
+      if (insumo.id == 0) {
+        await fetch(`${API_URL}/insumos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(insumo)
+        });
+      } else {
+        await fetch(`${API_URL}/insumos/${insumo.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(insumo)
+        });
+      }
 
-    document.getElementById('btnclean').addEventListener('click', () => {
-      document.getElementById('insumoForm').reset();
+      e.target.reset();
       document.getElementById('insumoId').value = '';
-    });
+      cargarInsumos();
 
-    e.target.reset();
+    } catch (err) {
+      console.error("Error al guardar insumo:", err);
+      alert("Ocurrió un error al guardar el insumo.");
+    }
+  });
+
+  document.getElementById('btnclean')?.addEventListener('click', () => {
+    document.getElementById('insumoForm').reset();
     document.getElementById('insumoId').value = '';
-    cargarInsumos();
   });
 });
 
 async function cargarInsumos() {
-  const res = await fetch(apiUrl);
-  const insumos = await res.json();
-  const tbody = document.getElementById('insumosTable');
-  tbody.innerHTML = '';
+  try {
+    const res = await fetch(`${API_URL}/insumos`);
+    if (!res.ok) throw new Error("No se pudieron cargar los insumos");
+    const insumos = await res.json();
 
-  insumos.forEach(insumo => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${insumo.id}</td>
-      <td>${insumo.nombre}</td>
-      <td>${insumo.descripcion}</td>
-      <td>${insumo.marca}</td>
-      <td>${insumo.stock}</td>
-      <td>$${insumo.precio.toFixed(2)}</td>
-      <td>${insumo.codigo}</td>
-      <td>
-        <button class="btn btn-sm btn-warning me-1" onclick='editarInsumo(${JSON.stringify(insumo)})'>Editar</button>
-      </td>
-    `;
-    tbody.appendChild(row);
-  });
+    const tbody = document.getElementById('insumosTable');
+    tbody.innerHTML = '';
+
+    insumos.forEach(insumo => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${insumo.id}</td>
+        <td>${insumo.nombre}</td>
+        <td>${insumo.descripcion}</td>
+        <td>${insumo.marca}</td>
+        <td>${insumo.stock}</td>
+        <td>$${insumo.precio.toFixed(2)}</td>
+        <td>${insumo.codigo}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-1" onclick='editarInsumo(${JSON.stringify(insumo)})'>Editar</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+
+  } catch (err) {
+    console.error("Error al cargar insumos:", err);
+    alert("Ocurrió un error al cargar los insumos.");
+  }
 }
 
 function editarInsumo(insumo) {
