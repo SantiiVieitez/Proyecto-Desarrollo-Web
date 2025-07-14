@@ -1,5 +1,8 @@
 const API_URL = "https://gestionusuariosapi2025-drhmdmhcdsbzdnbq.canadacentral-01.azurewebsites.net/api";
 
+// helper para obtener la base del proyecto
+const BASE_PATH = `${window.location.origin}/FrontEnd-DesarrolloWeb/`;
+
 // Cargar privilegios en la página
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("privilegiosContainer");
@@ -56,7 +59,7 @@ document.getElementById("guardarBtn").addEventListener("click", async () => {
 
     if (res.ok) {
       alert("✅ Usuario guardado correctamente");
-      window.location.href = "usuarios.html";
+      window.location.href = `${BASE_PATH}usuarios.html`;
     } else {
       const error = await res.json();
       console.error(error);
