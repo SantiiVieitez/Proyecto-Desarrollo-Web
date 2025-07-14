@@ -27,13 +27,13 @@ namespace Proyecto_Desarrollo_Web.Controllers
         [HttpGet("{id}")]
         public IActionResult GetInsumoById(int id)
         {
-            var usuario = _context.Insumos
+            var insumo = _context.Insumos
                 .FirstOrDefault(i => i.Id == id);
 
-            if (usuario == null)
+            if (insumo == null)
                 return NotFound("Insumo no encontrado");
 
-            return Ok(usuario);
+            return Ok(insumo);
         }
 
         [HttpPost]
